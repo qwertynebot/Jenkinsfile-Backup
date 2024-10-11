@@ -20,7 +20,7 @@ pipeline {
                     echo "Backing up frontend files from Kubernetes"
                     sh """
                         # Копіювання файлів з контейнера фронтенда
-                        kubectl cp $FRONTEND_POD:/var/www/html ./frontend_files_backup --container frontend-container-name
+                        kubectl cp $FRONTEND_POD:/usr/share/nginx/html ./frontend_files_backup --container frontend-container-name
                         # Архівування
                         tar -czf frontend_files_backup.tar.gz -C ./frontend_files_backup .
                     """
@@ -33,8 +33,11 @@ pipeline {
                 script {
                     echo "Backing up backend files from Kubernetes"
                     sh """
-                        # Копіювання файлів з контейнера бекенда
-                        kubectl cp $BACKEND_POD:/path/to/backend/files ./backend_files_backup --container backend-container-name
+                        # Копіювання скомпільованих файлів з контейнера бекенда
+                        kubectl cp $BACKEND_POD:/app/publish ./backend_files_backup --container backend-container-name
+                        # Копіювання статичних файлів
+                        kubectl cp $BACKEND_POD:/app/images ./backend_files_backup/images --container backend-container-name
+                        kubectl cp $BACKEND_POD:/app/EmailTemplates ./backend_files_backup/EmailTemplates --container backend-container-name
                         # Архівування
                         tar -czf backend_files_backup.tar.gz -C ./backend_files_backup .
                     """
