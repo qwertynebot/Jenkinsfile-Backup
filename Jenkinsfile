@@ -11,6 +11,8 @@ pipeline {
         DB_USER = 'postgres' // Користувач бази даних
         DB_PASSWORD = 'Z6!mNp9wA&v3Qd#Xr7Tf$2gL' // Пароль користувача бази даних
         RDS_ENDPOINT = 'database-qubix.cvcwm8usccw2.eu-north-1.rds.amazonaws.com' // Ваш RDS endpoint
+
+        KUBE_CONFIG = credentials('k8s') // Додайте креденшели Kubernetes
     }
 
     stages {
@@ -20,7 +22,7 @@ pipeline {
                     echo "Backing up frontend files from Kubernetes"
                     sh """
                         # Копіювання файлів з контейнера фронтенда
-                        kubectl cp $FRONTEND_POD:/usr/share/nginx/html ./frontend_files_backup --container frontend-container-name
+                        kubectl --kubeconfig=$KUBE_CONFIG cp $FRONTEND_POD:/usr/share/nginx/html ./frontend_files_backup --container frontend-container-name
                         # Архівування
                         tar -czf frontend_files_backup.tar.gz -C ./frontend_files_backup .
                     """
@@ -34,10 +36,10 @@ pipeline {
                     echo "Backing up backend files from Kubernetes"
                     sh """
                         # Копіювання скомпільованих файлів з контейнера бекенда
-                        kubectl cp $BACKEND_POD:/app/publish ./backend_files_backup --container backend-container-name
+                        kubectl --kubeconfig=$KUBE_CONFIG cp $BACKEND_POD:/app/publish ./backend_files_backup --container backend-container-name
                         # Копіювання статичних файлів
-                        kubectl cp $BACKEND_POD:/app/images ./backend_files_backup/images --container backend-container-name
-                        kubectl cp $BACKEND_POD:/app/EmailTemplates ./backend_files_backup/EmailTemplates --container backend-container-name
+                        kubectl --kubeconfig=$KUBE_CONFIG cp $BACKEND_POD:/app/images ./backend_files_backup/images --container backend-container-name
+                        kubectl --kubeconfig=$KUBE_CONFIG cp $BACKEND_POD:/app/EmailTemplates ./backend_files_backup/EmailTemplates --container backend-container-name
                         # Архівування
                         tar -czf backend_files_backup.tar.gz -C ./backend_files_backup .
                     """
