@@ -3,8 +3,8 @@ pipeline {
 
     environment {
         // Використовуйте Jenkins Credentials для AWS ключів
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id') // Заміна на ім'я ваших креденшалів
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Заміна на ім'я ваших креденшалів
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS') // Заміна на ім'я ваших креденшалів
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET') // Заміна на ім'я ваших креденшалів
         S3_BUCKET = 'qubixitstep'  // Вкажіть ваше S3 відро
         BACKEND_SERVICE_IP = 'a06ef3430318f44b580f93b8fff8db6a-86025589.eu-north-1.elb.amazonaws.com'
         FRONTEND_SERVICE_IP = 'a4fb534dc54a44d0a9e92d6fa94ac944-920711934.eu-north-1.elb.amazonaws.com'
