@@ -1,5 +1,11 @@
 pipeline {
-    agent any
+    agent {
+        kubernetes {
+            cloud 'facebook'
+            label 'k8s'
+            defaultContainer 'jnlp'
+        }
+    }
 
     environment {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS')
@@ -12,7 +18,7 @@ pipeline {
         DB_PASSWORD = 'Z6!mNp9wA&v3Qd#Xr7Tf$2gL' // Пароль користувача бази даних
         RDS_ENDPOINT = 'database-qubix.cvcwm8usccw2.eu-north-1.rds.amazonaws.com' // Ваш RDS endpoint
 
-        KUBE_CONFIG = credentials('k8s') // Додайте креденшели Kubernetes
+        KUBE_CONFIG = credentials('kubeconfig') // Додайте креденшели Kubernetes
     }
 
     stages {
