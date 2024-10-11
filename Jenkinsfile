@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS')
+        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET')
         S3_BUCKET = 'qubixitstep'  // Назва вашого S3 відра
         BACKEND_POD = 'backend-deployment-6ff9fd966b-rxkgw' // Назва вашого бекенд пода
         FRONTEND_POD = 'frontend-deployment-797dcf5c9d-szt5m' // Назва вашого фронтенд пода
