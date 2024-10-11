@@ -2,42 +2,67 @@ pipeline {
     agent any
 
     environment {
-        // Використовуйте Jenkins Credentials для AWS ключів
-        AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS') // Заміна на ім'я ваших креденшалів
-        AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET') // Заміна на ім'я ваших креденшалів
-        S3_BUCKET = 'qubixitstep'  // Вкажіть ваше S3 відро
-        BACKEND_SERVICE_IP = 'a06ef3430318f44b580f93b8fff8db6a-86025589.eu-north-1.elb.amazonaws.com'
-        FRONTEND_SERVICE_IP = 'a4fb534dc54a44d0a9e92d6fa94ac944-920711934.eu-north-1.elb.amazonaws.com'
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
+        S3_BUCKET = 'qubixitstep'  // Назва вашого S3 відра
+        BACKEND_POD = 'backend-deployment-6ff9fd966b-rxkgw' // Назва вашого бекенд пода
+        FRONTEND_POD = 'frontend-deployment-797dcf5c9d-szt5m' // Назва вашого фронтенд пода
+        DATABASE_NAME = 'facebook' // Ім'я вашої бази даних
+        DB_USER = 'postgres' // Користувач бази даних
+        DB_PASSWORD = 'Z6!mNp9wA&v3Qd#Xr7Tf$2gL' // Пароль користувача бази даних
+        RDS_ENDPOINT = 'database-qubix.cvcwm8usccw2.eu-north-1.rds.amazonaws.com' // Ваш RDS endpoint
     }
 
     stages {
-        stage('Backup Backend Service') {
+        stage('Backup Frontend Files') {
             steps {
                 script {
-                    echo "Backing up Backend Service"
-                    // Зберігаємо бекенд конфігурацію або дані
+                    echo "Backing up frontend files from Kubernetes"
                     sh """
-                        echo "Fetching data from backend service"
-                        curl -s -o backend_backup.txt http://$BACKEND_SERVICE_IP:5181 || { echo 'Backend service request failed'; exit 1; }
-                        
-                        echo "Uploading to S3"
-                        aws s3 cp backend_backup.txt s3://$S3_BUCKET/backend_backup.txt || { echo 'S3 upload failed'; exit 1; }
+                        # Копіювання файлів з контейнера фронтенда
+                        kubectl cp $FRONTEND_POD:/var/www/html ./frontend_files_backup --container frontend-container-name
+                        # Архівування
+                        tar -czf frontend_files_backup.tar.gz -C ./frontend_files_backup .
                     """
                 }
             }
         }
 
-        stage('Backup Frontend Service') {
+        stage('Backup Backend Files') {
             steps {
                 script {
-                    echo "Backing up Frontend Service"
-                    // Зберігаємо фронтенд конфігурацію або дані
+                    echo "Backing up backend files from Kubernetes"
                     sh """
-                        echo "Fetching data from frontend service"
-                        curl -s -o frontend_backup.txt http://$FRONTEND_SERVICE_IP:80 || { echo 'Frontend service request failed'; exit 1; }
-                        
-                        echo "Uploading to S3"
-                        aws s3 cp frontend_backup.txt s3://$S3_BUCKET/frontend_backup.txt || { echo 'S3 upload failed'; exit 1; }
+                        # Копіювання файлів з контейнера бекенда
+                        kubectl cp $BACKEND_POD:/path/to/backend/files ./backend_files_backup --container backend-container-name
+                        # Архівування
+                        tar -czf backend_files_backup.tar.gz -C ./backend_files_backup .
+                    """
+                }
+            }
+        }
+
+        stage('Backup Database') {
+            steps {
+                script {
+                    echo "Backing up database"
+                    sh """
+                        # Експорт бази даних з Amazon RDS
+                        mysqldump -h $RDS_ENDPOINT -u $DB_USER -p$DB_PASSWORD $DATABASE_NAME > database_backup.sql
+                    """
+                }
+            }
+        }
+
+        stage('Upload Backups to S3') {
+            steps {
+                script {
+                    echo "Uploading backups to S3"
+                    sh """
+                        # Завантаження архівів до S3
+                        aws s3 cp frontend_files_backup.tar.gz s3://$S3_BUCKET/
+                        aws s3 cp backend_files_backup.tar.gz s3://$S3_BUCKET/
+                        aws s3 cp database_backup.sql s3://$S3_BUCKET/
                     """
                 }
             }
