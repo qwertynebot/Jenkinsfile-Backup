@@ -11,12 +11,12 @@ pipeline {
         AWS_ACCESS_KEY_ID = credentials('AWS_ACCESS')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET')
         S3_BUCKET = 'qubixitstep'  // Назва вашого S3 відра
-        BACKEND_POD = 'backend-deployment-6ff9fd966b-rxkgw' // Назва вашого бекенд пода
-        FRONTEND_POD = 'frontend-deployment-797dcf5c9d-szt5m' // Назва вашого фронтенд пода
+        BACKEND_POD = '' // Назва вашого бекенд пода
+        FRONTEND_POD = '' // Назва вашого фронтенд пода
         DATABASE_NAME = 'facebook' // Ім'я вашої бази даних
         DB_USER = 'postgres' // Користувач бази даних
-        DB_PASSWORD = 'Z6!mNp9wA&v3Qd#Xr7Tf$2gL' // Пароль користувача бази даних
-        RDS_ENDPOINT = 'database-qubix.cvcwm8usccw2.eu-north-1.rds.amazonaws.com' // Ваш RDS endpoint
+        DB_PASSWORD = '' // Пароль користувача бази даних
+        RDS_ENDPOINT = '' // Ваш RDS endpoint
 
         KUBE_CONFIG = credentials('kubeconfig') // Додайте креденшели Kubernetes
     }
